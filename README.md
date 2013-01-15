@@ -11,65 +11,71 @@ Introspection is not a high priority - there are no methods to check if a transi
 
 Everything defined here lives inside the StateMachine class. There are no explicit dependencies on ActiveRecord, so you could probably use this in other Ruby projects if you wanted to.
 
-TODO: This has been extracted from the project it was originally made for; tests exist in that project but are not yet present here.
 
 ```
 gem 'two-states', git: 'git@github.com:envato/two-states.git'
 
 require 'state_machine'
 
-class Document < ActiveRecord::Base
-  validates :title, uniqueness: true
+class Document < MockRecord
+  attr_accessor :name, :content, :published_at, :deleted_at
 
-  class ApprovalStateMachine < StateMachine
+  # 
+  # This is the idiomatic way to attach a state machine to your record
+  # 
 
-    class NewState              < State; end
-    class PendingApprovalState  < State; end
-    class RejectedState         < State; end
-    class ActiveState           < State; end
-    class ExpiredState          < State; end
+  def status
+    @status ||= Document::Workflow.new(self, :status)
+  end
 
-    #
-    # helper methods
-    #
+  #
+  # Define our state machine as an inner class; it doesn't have to be though.
+  #
+
+  class Workflow < StateMachine
+    
+    # define subclasses of StateMachine::State for each possible state 
+
+    define_states :draft, :published, :deleted
+
+    # any helper methods declared here are available from within our transition methods
 
     def document
       record
     end
 
-    def mailer
-      ::DocumentMailer
-    end
-    def approved?
-      !!document.approved_at
-    end  
-    def rejected?
-      !!document.rejected_at
-    end    
-    def active?
-      document.status.approved? && !document.hidden? && current?    
-    end
-    def pending?
-      current_state == PendingApprovalState
+    def can_publish?
+      current_state == :draft
     end
 
     #
-    # Transitions
-    #
+    # transitions - you could use delegate if you wanted to call these on the record itself
+    # these are just plain old methods that happen to call #current_state=
 
-    def paid!(payment, time=Time.now)      
-      raise TransitionError.new("#{current_state} is not #{NewState}") unless current_state == NewState
-      raise ArgumentError.new(time) unless time.is_a?(Time)
-      raise ArgumentError.new(payment) unless payment.is_a?(JobPayment) && payment.job == record
-      raise ArgumentError.new(payment) unless payment.completed?
+    def publish!(time=Time.now)
+      # check any preconditions by raising exceptions (including current states)
+      raise TransitionError.new("#{current_state} can't be published") unless can_publish?
+      raise ArgumentError.new("#{time.inspect} is not a Time") unless time.is_a?(Time)
 
-      Job.transaction do
-        self.current_state = PendingApprovalState    
-        job.events.build(event_type: 'status.paid', payload: time, job_changes: job.changes)        
-        job.save!
-        mailer.delay.created(job)
-      end
+      document.published_at = time
+      self.current_state = :published
+      # you might like to call #save! here if this is were an activerecord model
+      true
     end
+
+    def delete!(time=Time.now)
+      # check preconditions
+      raise TransitionError.new("already deleted") if current_state == :deleted
+      raise ArgumentError.new("#{time.inspect} is not a Time") unless time.is_a?(Time)
+
+      document.deleted_at = time
+      self.current_state = :deleted
+      # you might like to call #save! here if this is were an activerecord model
+      true
+    end
+
+  end
+end
 ```
 
 
