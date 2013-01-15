@@ -14,6 +14,66 @@ Everything defined here lives inside the StateMachine class. There are no explic
 TODO: This has been extracted from the project it was originally made for; tests exist in that project but are not yet present here.
 
 ```
+gem 'two-states', git: 'git@github.com:envato/two-states.git'
+
+require 'state_machine'
+
+class Document < ActiveRecord::Base
+  validates :title, uniqueness: true
+
+  class ApprovalStateMachine < StateMachine
+
+    class NewState              < State; end
+    class PendingApprovalState  < State; end
+    class RejectedState         < State; end
+    class ActiveState           < State; end
+    class ExpiredState          < State; end
+
+    #
+    # helper methods
+    #
+
+    def document
+      record
+    end
+
+    def mailer
+      ::DocumentMailer
+    end
+    def approved?
+      !!document.approved_at
+    end  
+    def rejected?
+      !!document.rejected_at
+    end    
+    def active?
+      document.status.approved? && !document.hidden? && current?    
+    end
+    def pending?
+      current_state == PendingApprovalState
+    end
+
+    #
+    # Transitions
+    #
+
+    def paid!(payment, time=Time.now)      
+      raise TransitionError.new("#{current_state} is not #{NewState}") unless current_state == NewState
+      raise ArgumentError.new(time) unless time.is_a?(Time)
+      raise ArgumentError.new(payment) unless payment.is_a?(JobPayment) && payment.job == record
+      raise ArgumentError.new(payment) unless payment.completed?
+
+      Job.transaction do
+        self.current_state = PendingApprovalState    
+        job.events.build(event_type: 'status.paid', payload: time, job_changes: job.changes)        
+        job.save!
+        mailer.delay.created(job)
+      end
+    end
+```
+
+
+```
 Two states 
 We want two states 
 North and south 
