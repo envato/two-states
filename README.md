@@ -1,19 +1,18 @@
 # two-states
 ============
 
-This is a simple state machine library for ActiveRecord projects. It is designed above all else to be as simple and explicit as possible, while still providing enough flexibility for many projects.
+This is a *very* simple state machine library for ActiveRecord projects. It is designed above all else to be as simple and explicit as possible, while still providing enough flexibility for many projects.
 
-The current state of a record is kept in a database column; you can have more than one state for, and multiple state machines on, a single record.
+The current state of a record is kept in a database column; one record can have as many state machines as you deem useful.
 
-Transitions are not explicitly modeled as classes, nor persisted in the database - they are implemented as methods on your state machine(s). You can specify guard conditions by raising a TransitionError from these methods.
+State machines are simply subclasses of StateMachine; each state is a subclass of StateMachine::State (though you can treat them pretty much as if they're symbols if you like). 
 
-Introspection is not a high priority - there are no methods to check if a transition is possible, for example, nor to see a list of the states you can transition to from the current state. This is intentional, although there's nothing to stop you building on top of this very minimal library if you want that kind of thing.
+Events and transitions are just methods, defined inside your state machine class, which change the state. It's up to you to decide under what conditions a state transfer will occur and whether to raise a TransitionError or silently ignore failures. You can specify guard conditions inside transition methods if you need them. If you want other features, you'll either find you're able to easily add them yourself, or you'll go elsewhere.
 
-Everything defined here lives inside the StateMachine class. There are no explicit dependencies on ActiveRecord, so you could probably use this in other Ruby projects if you wanted to.
-
+There are no explicit dependencies on ActiveRecord, so you could probably use this in non-ActiveRecord Ruby projects if you wanted to. Small parts of ActiveSupport are selectively required.
 
 ```
-gem 'two-states', git: 'git@github.com:envato/two-states.git'
+gem 'two-states', git: 'git@github.com:davidlee/two-states.git'
 
 require 'state_machine'
 
