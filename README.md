@@ -11,7 +11,7 @@ Events and transitions are just methods, defined inside your state machine class
 
 There are no explicit dependencies on ActiveRecord, so you could probably use this in non-ActiveRecord Ruby projects if you wanted to. Small parts of ActiveSupport are selectively required.
 
-```
+```ruby
 gem 'two-states', git: 'git@github.com:davidlee/two-states.git'
 
 require 'state_machine'
