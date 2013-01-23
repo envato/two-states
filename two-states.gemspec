@@ -7,5 +7,6 @@ Gem::Specification.new do |s|
   s.authors     = ["David Lee"]
   s.email       = 'david.lee@envato'
   s.files       = ["lib/two-states.rb", "lib/state_machine.rb"]
+  s.require_paths = ["lib"]
   s.homepage    = 'http://github.com/envato/two-states'
 end
