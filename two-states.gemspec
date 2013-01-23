@@ -6,6 +6,6 @@ Gem::Specification.new do |s|
   s.description = "Write multiple, explicit state machines for your activerecord models."
   s.authors     = ["David Lee"]
   s.email       = 'david.lee@envato'
-  s.files       = ["lib/state_machine.rb"]
+  s.files       = ["lib/two-states.rb", "lib/state_machine.rb"]
   s.homepage    = 'http://github.com/envato/two-states'
 end
