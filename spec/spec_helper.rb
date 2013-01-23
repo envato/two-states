@@ -1,5 +1,8 @@
 require 'rspec'
 require 'mock_record'
 
-require_relative '../lib/state_machine'
+$: << 'lib'
+
+require 'two-states'
+
 require_relative '../example/document'
