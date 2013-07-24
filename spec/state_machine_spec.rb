@@ -20,7 +20,14 @@ describe StateMachine do
       Machine::CaterpillarState.superclass.should == StateMachine::State
       Machine::ButterflyState.superclass.should   == StateMachine::State
       Machine::CorpseState.superclass.should      == StateMachine::State
-    end    
+    end
+
+    it "generate query methods for the states defined" do 
+      Machine.public_instance_methods.should_not include :ready?      
+      Machine.define_states :ready, :set, :gone
+      Machine.public_instance_methods.should include :ready?
+
+    end
   end
 
   describe ".name" do
@@ -74,6 +81,16 @@ describe StateMachine do
     # end
 
     let(:document) { Document.new(status: 'draft') }
+
+    describe "query methods" do 
+      it 'should return true when the current_state == the name of the method' do 
+        document.status.draft?.should be_true
+        document.status.published?.should be_false
+        document.status.publish!
+        document.status.draft?.should be_false
+        document.status.published?.should be_true        
+      end
+    end
 
     describe "#current_state" do
       it "return the state with name" do

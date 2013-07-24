@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'two-states'
-  s.version     = '0.0.1'
+  s.version     = '0.0.2'
   s.date        = '2012-01-04'
   s.summary     = "Simple, explicit state machines for activerecord / ruby projects"
   s.description = "Write multiple, explicit state machines for your activerecord models."

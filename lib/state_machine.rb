@@ -116,7 +116,10 @@ class StateMachine
     names.each do |name|
       state_class_name = name.to_s.titleize.gsub(/ /,'') + 'State'
       const_set(state_class_name, Class.new(::StateMachine::State))
-    end
+      define_method "#{name}?" do 
+        current_state == name
+      end
+    end    
   end
 
   #
