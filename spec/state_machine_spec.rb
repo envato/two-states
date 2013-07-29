@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 describe StateMachine do
-  before do 
-    Machine = Class.new(StateMachine)    
+  before do
+    Machine = Class.new(StateMachine)
   end
 
   after do
     Object.send :remove_const, 'Machine'
   end
 
-  # class methods  
+  # class methods
   describe ".define_states" do
 
     it "define StateMachine::State subclasses on the caller" do
@@ -22,27 +22,11 @@ describe StateMachine do
       Machine::CorpseState.superclass.should      == StateMachine::State
     end
 
-    it "generate query methods for the states defined" do 
-      Machine.public_instance_methods.should_not include :ready?      
+    it "generate query methods for the states defined" do
+      Machine.public_instance_methods.should_not include :ready?
       Machine.define_states :ready, :set, :gone
       Machine.public_instance_methods.should include :ready?
 
-    end
-  end
-
-  describe ".name" do
-    it "return the name as a symbol" do
-      Machine.name.should == :machine
-    end
-
-    it "underscore and demodulize it" do
-      Machine.const_set('BananaFactory', Class.new(StateMachine))
-      Machine::BananaFactory.name.should == :banana_factory
-    end
-
-    it "strip any trailing state_machine for brevity" do
-      Machine::const_set('BananaFactoryStateMachine', Class.new(StateMachine))
-      Machine::BananaFactoryStateMachine.name.should == :banana_factory
     end
   end
 
@@ -82,13 +66,13 @@ describe StateMachine do
 
     let(:document) { Document.new(status: 'draft') }
 
-    describe "query methods" do 
-      it 'should return true when the current_state == the name of the method' do 
+    describe "query methods" do
+      it 'should return true when the current_state == the name of the method' do
         document.status.draft?.should be_true
         document.status.published?.should be_false
         document.status.publish!
         document.status.draft?.should be_false
-        document.status.published?.should be_true        
+        document.status.published?.should be_true
       end
     end
 
@@ -121,13 +105,6 @@ describe StateMachine do
         expect do
           document.status.send :current_state=, :published
         end.to change(document.status, :current_state).to(Document::Workflow::PublishedState)
-      end
-    end    
-
-    describe "#name" do
-      it "returns the name of the class (the state machine's name)" do
-        document.status.name.should == Document::Workflow.name
-        document.status.name.should == :workflow
       end
     end
 
@@ -162,7 +139,7 @@ describe StateMachine do
 
       it "equal itself" do
         document.status.should == document.status
-      end      
+      end
     end
 
     describe "case equality" do
@@ -185,13 +162,13 @@ describe StateMachine do
   end # instance methods
 
   describe "State" do
-    before do 
+    before do
       Machine.define_states :alpha, :beta, :gamma
     end
 
     describe "#name" do
       it "class name underscorified and bereft of State" do
-        Machine::AlphaState.name.should == :alpha        
+        Machine::AlphaState.name.should == :alpha
       end
     end
 
@@ -200,7 +177,7 @@ describe StateMachine do
         Machine::AlphaState.should == Machine::AlphaState
         Machine::AlphaState.should == :alpha
         Machine::AlphaState.should_not == Machine::BetaState
-        Machine::AlphaState.should_not == :beta        
+        Machine::AlphaState.should_not == :beta
       end
     end
 
@@ -213,7 +190,7 @@ describe StateMachine do
 
   describe "example state machine" do
     let(:document) { Document.new(status: 'draft') }
-    
+
     describe "helper methods" do
       it "works" do
         document.status.document.should == document
@@ -229,7 +206,7 @@ describe StateMachine do
 
       it "raise a TransitionError if you try to publish it when it can't be published" do
         document.status.stub(:can_publish?) { false }
-        expect do 
+        expect do
           document.status.publish!
         end.to raise_error(StateMachine::TransitionError)
       end

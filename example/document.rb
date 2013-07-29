@@ -1,9 +1,9 @@
 class Document < MockRecord
   attr_accessor :name, :content, :published_at, :deleted_at
 
-  # 
+  #
   # This is the idiomatic way to attach a state machine to your record
-  # 
+  #
 
   def status
     @status ||= Document::Workflow.new(self, :status)
@@ -14,8 +14,7 @@ class Document < MockRecord
   #
 
   class Workflow < StateMachine
-    
-    # define subclasses of StateMachine::State for each possible state 
+    # define subclasses of StateMachine::State for each possible state
 
     define_states :draft, :published, :deleted
 
@@ -32,7 +31,6 @@ class Document < MockRecord
     #
     # transitions - you could use delegate if you wanted to call these on the record itself
     # these are just plain old methods that happen to call #current_state=
-
     def publish!(time=Time.now)
       # check any preconditions by raising exceptions (including current states)
       raise TransitionError.new("#{current_state} can't be published") unless can_publish?

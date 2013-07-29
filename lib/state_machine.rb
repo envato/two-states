@@ -60,7 +60,7 @@ class StateMachine
   # allow comparison of state machines / states as symbols as a convenience;
   # a state machine is equal to the value of its current state.
   #
-  # this allows us to say things like 
+  # this allows us to say things like
   # if record.status == :active
 
   def == other
@@ -80,13 +80,13 @@ class StateMachine
   #
 
   class << self
-    
+
     # class-local instance variables; plain old class variables are inherited.
     # each subclass of StateMachine has its own name & set of states.
 
-    def name
-      @name ||= self.to_s.demodulize.underscore.sub(/_state_machine$/,'').to_sym
-    end
+    #def name
+    #  @name ||= self.to_s.demodulize.underscore.sub(/_state_machine$/,'').to_sym
+    #end
 
     def states
       @states ||= build_states_collection
@@ -106,7 +106,7 @@ class StateMachine
       them_states.extend CollectionMethods
     end
 
-  end 
+  end
 
   #
   # shorthand for defining state classes inside subclasses of StateMachine
@@ -116,16 +116,16 @@ class StateMachine
     names.each do |name|
       state_class_name = name.to_s.titleize.gsub(/ /,'') + 'State'
       const_set(state_class_name, Class.new(::StateMachine::State))
-      define_method "#{name}?" do 
+      define_method "#{name}?" do
         current_state == name
       end
-    end    
+    end
   end
 
   #
-  # StateMachine::State – subclass this inside your subclass of StateMachine 
+  # StateMachine::State – subclass this inside your subclass of StateMachine
   # to define states for the machine
-  # 
+  #
 
   class State
     class << self
@@ -134,7 +134,7 @@ class StateMachine
       end
 
       def == other
-        super || name == other 
+        super || name == other
       end
 
       def === other
@@ -148,7 +148,7 @@ class StateMachine
       def to_sym
         name
       end
-    
+
       alias_method :intern, :to_sym
     end
   end
